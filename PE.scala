@@ -8,7 +8,7 @@ class PE_Module(val dim : 128, val paral : UInt = 1, val W: UInt = 64) extends M
     val query = Flipped(Decoupled(Vec(paral, Bits(W.W)))) // broadcasted
     val ref = Flipped(Decoupled(Vec(paral, Bits(W.W)))) // each pe in pe group(1xn PEs) processes one ref
     val dist_k = Input(Bits(W.W))
-    val address_i = Input(Bits(W.W)) // From controller
+    val address_i = Flipped(Decoupled(Bits(W.W))) // From controller
     // these are to pass the signals to topK
     val address_north = Flipped(Decoupled(Bits(W.W))) // From north PE
     val address_south = Decoupled(Bits(W.W)) // To south PE
@@ -46,10 +46,10 @@ class PE_Module(val dim : 128, val paral : UInt = 1, val W: UInt = 64) extends M
     switch(state) {
       is(idle){
         skip_to_next := false.B
-        when(io.query.valid && io.ref.valid){
+        when(io.query.valid && io.ref.valid && io.address_i.valid){
           counter := 0.U
           state := running
-          addr_PE_reg := io.address_i //see if need to create a separate signal
+          addr_PE_reg := io.address_i.bits
         }
         .otherwise{
           counter := 0.U
@@ -99,4 +99,6 @@ class PE_Module(val dim : 128, val paral : UInt = 1, val W: UInt = 64) extends M
     }
 
     /* south bridge dequeue state machine */
+    io.address_south <> fifo_addr.deq
+    io.dist_south <> fifo_dist.deq
 }

@@ -1,47 +1,66 @@
 package proj_topK
 
-import chiseltest._
 import chisel3._
+import chiseltest._
 import org.scalatest.flatspec.AnyFlatSpec
-// import sha3.TestWithBackendSelect
 
 class KthSmallestTrackerTests extends TestWithBackendSelect with ChiselScalatestTester {
   behavior of "KthSmallestTracker"
 
-  it should "find the K-th smallest distance correctly" in {
-    test(new KthSmallestTracker(K = 3, W = 32)).withAnnotations(simAnnos) { c =>
-      val test_distances = Seq(30, 15, 25, 10, 20, 5, 8)
-      val expected_kth_smallest = Seq(30, 30, 30, 25, 20, 15, 10) // Expected output per cycle
-      var timeout = 100
+  it should "produce no valid output until finish is asserted and then output the correct kth smallest and addresses" in {
+    
+    test(new KthSmallestTracker(K = 3, W = 32, AW = 8)).withAnnotations(simAnnos) { c =>
+      
+     
+      c.io.finish.poke(false.B)
+      c.io.in.valid.poke(false.B)
+      c.io.kthOut.ready.poke(true.B)
 
-      c.io.in.valid.poke(0)
-      c.io.out.ready.poke(1)
+      
+      val testInputs = Seq(
+        (30, 0),
+        (15, 1),
+        (25, 2),
+        (10, 3),
+        (20, 4),
+        (5, 5),
+        (8, 6)
+      )
 
-      // Feed test distances into the module
-      for ((dist, expected) <- test_distances.zip(expected_kth_smallest)) {
-        println(s"Poking input distance: $dist") // Fix: Corrected string interpolation
-
-        c.io.in.bits.poke(dist.U(32.W))
-        c.io.in.valid.poke(1)
+     
+      for ((dist, addr) <- testInputs) {
+        c.io.in.bits.distance.poke(dist.U)
+        c.io.in.bits.addr.poke(addr.U)
+        c.io.in.valid.poke(true.B)
         c.clock.step(1)
-        c.io.in.valid.poke(0)
-
-        // Wait for output to be valid
-        timeout = 100
-        while (c.io.out.valid.peekBoolean() == false && timeout > 0) {
-          c.clock.step(1)
-          timeout -= 1
-        }
-
-        assert(timeout > 0, "FAIL - KthSmallestTracker test timed out.")
-
-        val output = c.io.out.bits.peek().litValue
-        println(s"Output K-th smallest: $output (Expected: $expected)") // Fix: Corrected interpolation
-
-        c.io.out.bits.expect(expected.U(32.W))
+        c.io.in.valid.poke(false.B)
+        c.clock.step(1) // Allow time for internal updates.
       }
 
-      println("KthSmallestTracker test PASSED.")
+      
+      c.io.kthOut.valid.expect(false.B)
+      c.io.addrValid.expect(false.B)
+
+      
+      c.io.finish.poke(true.B)
+      c.clock.step(1)
+
+      
+      c.io.kthOut.valid.expect(true.B)
+      c.io.addrValid.expect(true.B)
+      
+      
+      // Heap is [(10,3), (8,6), (5,5)]
+      // Largest now these should be (10, addr=3).
+      c.io.kthOut.bits.distance.expect(10.U)
+      c.io.kthOut.bits.addr.expect(3.U)
+      
+      // Outputs final addresses [3, 6, 5].
+      c.io.addrOut(0).expect(3.U)
+      c.io.addrOut(1).expect(6.U)
+      c.io.addrOut(2).expect(5.U)
+
+      c.clock.step(2)
     }
   }
 }

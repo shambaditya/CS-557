@@ -1,0 +1,18 @@
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(testOnly project.KthSmallestTrackerTests, Some(0b8a825f-e73a-4502-af37-6660f7b5f5fc), Some(CommandSource(console0)))[0m
+[0m[[0m[0mdebug[0m] [0m[0mEvaluating tasks: Test / testOnly[0m
+[0m[[0m[0mdebug[0m] [0m[0mRunning task... Cancel: Signal, check cycles: false, forcegc: true[0m
+[0m[[0m[0minfo[0m] [0m[0mcompiling 1 Scala source to /home/huxianfeng/CS557/target/scala-2.13/classes ...[0m
+[0m[[0m[0minfo[0m] [0m[0mcompiling 2 Scala sources to /home/huxianfeng/CS557/target/scala-2.13/test-classes ...[0m
+[0m[[0m[33mwarn[0m] [0m[0m17 feature warnings; re-run with -feature for details[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mKthSmallestTrackerTests:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mKthSmallestTracker[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should produce no valid output until finish is asserted and then output the correct kth smallest and addresses[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[36mRun completed in 1 second, 645 milliseconds.[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[36mTotal number of tests run: 1[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[36mSuites: completed 1, aborted 0[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[36mTests: succeeded 1, failed 0, canceled 0, ignored 0, pending 0[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mAll tests passed.[0m[0m
+[0m[[0m[32msuccess[0m] [0m[0mTotal time: 2 s, completed Apr 10, 2025, 1:51:08 AM[0m
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(shell, None, None)[0m
+[0m[[0m[0mdebug[0m] [0m[0mForcing garbage collection...[0m

@@ -1,0 +1,4 @@
+[debug] [my_vector] Classpath dependencies List()
+[debug] [my_vector] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'my_vector' to '/home/huxianfeng/CS557/.bloop/my_vector.json'
+[success] Generated .bloop/my_vector.json

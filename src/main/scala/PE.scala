@@ -32,12 +32,12 @@ class PE_Module(val dim: Int = 128, val paral:Int = 1, val W : Int = 16) extends
     val idle::running::Nil = Enum(2)
     val state = RegInit(idle)
     val dist_in_topk = RegInit(32767.S(16.W))
-    val dist_north_reg = RegInit(0.U(W.W))//north
+    val dist_north_reg = RegInit(0.S(W.W))//north
     val addr_north_reg = RegInit(0.U(W.W))//north
     val reg_ready_to_enq_north = RegInit(false.B)
     val addr_PE_reg = RegInit(0.U(W.W)) // this addr
     val reg_ready_to_enq_PE = RegInit(false.B)
-    val counter = RegInit(0.U(5.W))
+    val counter = RegInit(0.U(8.W))
     val num_cycle = dim / paral
     val acc_dist = RegInit(0.S(W.W))
     /* compute path */
@@ -51,10 +51,10 @@ class PE_Module(val dim: Int = 128, val paral:Int = 1, val W : Int = 16) extends
     }
     val compute_valid = RegNext(io.refs.valid)
     /* end of compute */
+    io.skip_to_next := false.B
     io.partial_dist := tmp // test purpose
     switch(state) {
       is(idle){
-        io.skip_to_next := false.B
         when(io.query.valid && io.refs.valid){ // && io.address_i.valid
           counter := 0.U
           state := running
@@ -67,21 +67,30 @@ class PE_Module(val dim: Int = 128, val paral:Int = 1, val W : Int = 16) extends
         }
       }
       is(running) {
-        counter := counter + 1.U
+        
         addr_PE_reg := addr_PE_reg
-        when (tmp > dist_in_topk || counter === num_cycle.U - 1.U){
+        when (compute_valid && counter === num_cycle.U - 1.U){
           /* this case prioritize this PE's enq at its last compute cycle */
           fifo_addr.io.enq.valid := true.B
           fifo_dist.io.enq.valid := true.B
-          fifo_dist.io.enq.bits := acc_dist
+          fifo_dist.io.enq.bits := tmp
           fifo_addr.io.enq.bits := addr_PE_reg
           acc_dist := 0.S
           io.skip_to_next := true.B
+          state := idle
+          counter := 0.U
         }
-        .elsewhen(compute_valid){
+        .elsewhen(compute_valid && counter < num_cycle.U - 1.U){
           // set tmp dist
+          counter := counter + 1.U
           acc_dist := tmp
           io.skip_to_next := false.B
+        }
+        .elsewhen(tmp > dist_in_topk){
+          state := idle
+          acc_dist := 0.S
+          io.skip_to_next := true.B
+          counter := 0.U
         }
       }
     }
@@ -113,4 +122,11 @@ class PE_Module(val dim: Int = 128, val paral:Int = 1, val W : Int = 16) extends
     /* south bridge dequeue state machine */
     io.address_south <> fifo_addr.io.deq
     io.dist_south <> fifo_dist.io.deq
+
+    io.address_north.ready := true.B
+    io.dist_north.ready := true.B
+    io.refs.ready := true.B
+    io.query.ready := true.B
+    io.dist_k.ready := true.B
+
 }

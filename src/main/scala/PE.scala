@@ -82,11 +82,16 @@ class PE_Module(val dim: Int = 32, val paral:Int = 1, val W : Int = 16) extends 
         }
         .elsewhen(compute_valid && counter < num_cycle.U - 1.U){
           // set tmp dist
+          fifo_addr.io.enq.valid := false.B
+          fifo_dist.io.enq.valid := false.B
           counter := counter + 1.U
           acc_dist := tmp
+          state := running
           io.skip_to_next := false.B
         }
         .elsewhen(tmp > dist_in_topk){
+          fifo_addr.io.enq.valid := false.B
+          fifo_dist.io.enq.valid := false.B
           state := idle
           acc_dist := 0.S
           io.skip_to_next := true.B

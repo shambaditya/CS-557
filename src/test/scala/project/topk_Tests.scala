@@ -25,7 +25,7 @@ class topUnit_Tests extends TestWithBackendSelect with ChiselScalatestTester {
         var dist = 0
         c.clock.step(1)
         var i = 0
-        for (t <- 0 until dim) {
+        for (t <- 0 until 128) {
         // Enable broadcast query
         c.io.broadcast_query.valid.poke(true.B)
 
@@ -55,6 +55,7 @@ class topUnit_Tests extends TestWithBackendSelect with ChiselScalatestTester {
         c.clock.step(1)
         }
         println(c.io.addrOut.peek())
+        c.clock.step(32)
     }
   }
 }

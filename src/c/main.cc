@@ -2,16 +2,18 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
-#include <cmath>
 #include <cstring>
-#include <vector>
+#include <stdint.h>   // For uintptr_t
+#include <algorithm>  // For min/max
 
+// Beethoven FPGA header includes (commented out)
 // #include <beethoven/fpga_handle.h>
 // #include <beethoven_hardware.h>
 
 using namespace std;
 // using namespace beethoven;
 
+// Beethoven FPGA helper functions (commented out)
 /*
 void dma_workaround_copy_to_fpga(remote_ptr &q) {
     int sz = q.getLen() / 4; // assuming 4 bytes per word
@@ -30,193 +32,242 @@ void dma_workaround_copy_from_fpga(remote_ptr &q) {
 }
 */
 
-
-bool fillSuperblock(ifstream &infile, int *superblock, int NUM_PARTITIONS, 
-                   int ROWS_PER_PARTITION, int num_elements_per_partition, 
-                   int &total_rows_processed, bool &moreData) {
-    int current_partition = 0;
-    int rowInCurrentPartition = 0;
-    bool filledAny = false;
+int main() {
+    // Fixed parameters
+    const int NUM_DIM = 128;           // Dimensions per vector
+    const int NUM_PARTITIONS = 16;     // Number of partitions
+    const int ALIGNMENT = 4096;        // 4KB alignment
     
+    // First pass: count rows in the dataset
+    ifstream countFile("out23.csv");
+    if (!countFile.is_open()) {
+        cerr << "Failed to open CSV file for counting: out23.csv" << endl;
+        return -1;
+    }
     string line;
-    while (getline(infile, line)) {
-        total_rows_processed++;
-        filledAny = true;
-        
-        // Process the row data 
+    // Skip header
+    if (!getline(countFile, line)) {
+        cerr << "CSV file is empty." << endl;
+        return -1;
+    }
+    int totalRows = 0;
+    while (getline(countFile, line)) {
+        totalRows++;
+    }
+    countFile.close();
+    
+    cout << "\nDataset information:" << endl;
+    cout << "- Total rows detected: " << totalRows << endl;
+    cout << "- Total data elements: " << (totalRows * NUM_DIM) << endl;
+    
+    // Determine how many rows each partition should contain (capacity) using ceiling division
+    int rowsPerPartition = (totalRows + NUM_PARTITIONS - 1) / NUM_PARTITIONS;
+    cout << "- Rows per partition (capacity): " << rowsPerPartition << endl;
+    
+    // Compute the number of integers per partition and then compute the byte size
+    int partitionSizeInts = rowsPerPartition * NUM_DIM;
+    size_t partitionSizeBytes = partitionSizeInts * sizeof(int);
+    
+    // Round up partition byte size to a multiple of ALIGNMENT (4KB)
+    if (partitionSizeBytes % ALIGNMENT != 0) {
+        partitionSizeBytes = ((partitionSizeBytes + ALIGNMENT - 1) / ALIGNMENT) * ALIGNMENT;
+    }
+    
+    cout << "- Each partition allocation size: " << (partitionSizeBytes / 1024.0) << " KB" << endl;
+    
+    // Total allocation for all 16 partitions
+    size_t totalAllocBytes = NUM_PARTITIONS * partitionSizeBytes;
+    cout << "- Total allocation size: " << (totalAllocBytes / (1024.0 * 1024.0)) << " MB" << endl;
+    
+    // Allocate one large block of memory with extra room to adjust for alignment
+    size_t extra = ALIGNMENT + sizeof(void*);
+    void* raw_ptr = malloc(totalAllocBytes + extra);
+    if (raw_ptr == NULL) {
+        cerr << "Failed to allocate memory" << endl;
+        return -1;
+    }
+    
+    // Manually align the pointer (similar to posix_memalign)
+    uintptr_t raw_addr = reinterpret_cast<uintptr_t>(raw_ptr);
+    uintptr_t aligned_addr = (raw_addr + sizeof(void*) + ALIGNMENT - 1) & ~(ALIGNMENT - 1);
+    // Store original pointer for later free (if needed)
+    *((void**)aligned_addr - 1) = raw_ptr;
+    
+    int* datasetPtr = reinterpret_cast<int*>(aligned_addr);
+    
+    // Initialize the allocated memory to zero
+    memset(datasetPtr, 0, totalAllocBytes);
+    
+    // Set up partition start addresses manually from the contiguous block.
+    int* partitionAddresses[NUM_PARTITIONS];
+    int intsPerPartition = partitionSizeBytes / sizeof(int);
+    partitionAddresses[0] = datasetPtr + 0 * intsPerPartition;
+    partitionAddresses[1] = datasetPtr + 1 * intsPerPartition;
+    partitionAddresses[2] = datasetPtr + 2 * intsPerPartition;
+    partitionAddresses[3] = datasetPtr + 3 * intsPerPartition;
+    partitionAddresses[4] = datasetPtr + 4 * intsPerPartition;
+    partitionAddresses[5] = datasetPtr + 5 * intsPerPartition;
+    partitionAddresses[6] = datasetPtr + 6 * intsPerPartition;
+    partitionAddresses[7] = datasetPtr + 7 * intsPerPartition;
+    partitionAddresses[8] = datasetPtr + 8 * intsPerPartition;
+    partitionAddresses[9] = datasetPtr + 9 * intsPerPartition;
+    partitionAddresses[10] = datasetPtr + 10 * intsPerPartition;
+    partitionAddresses[11] = datasetPtr + 11 * intsPerPartition;
+    partitionAddresses[12] = datasetPtr + 12 * intsPerPartition;
+    partitionAddresses[13] = datasetPtr + 13 * intsPerPartition;
+    partitionAddresses[14] = datasetPtr + 14 * intsPerPartition;
+    partitionAddresses[15] = datasetPtr + 15 * intsPerPartition;
+    
+    // Print out partition start addresses and verify 4KB alignment.
+    cout << "\nPartition Start Addresses:" << endl;
+    cout << "start_address_0 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[0]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[0])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_1 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[1]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[1])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_2 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[2]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[2])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_3 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[3]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[3])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_4 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[4]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[4])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_5 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[5]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[5])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_6 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[6]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[6])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_7 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[7]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[7])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_8 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[8]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[8])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_9 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[9]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[9])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_10 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[10]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[10])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_11 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[11]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[11])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_12 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[12]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[12])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_13 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[13]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[13])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_14 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[14]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[14])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    cout << "start_address_15 = 0x" << hex << reinterpret_cast<uintptr_t>(partitionAddresses[15]) << dec
+         << " // 4K aligned: " << (((reinterpret_cast<uintptr_t>(partitionAddresses[15])) % ALIGNMENT == 0) ? "Yes" : "No") << endl;
+    
+    // Open CSV file for processing
+    ifstream dataFile("out23.csv");
+    if (!dataFile.is_open()) {
+        cerr << "Failed to open CSV file for processing: out23.csv" << endl;
+        free(raw_ptr);
+        return -1;
+    }
+    
+    // Skip header
+    if (!getline(dataFile, line)) {
+        cerr << "CSV file is empty." << endl;
+        free(raw_ptr);
+        return -1;
+    }
+    cout << "\nProcessing CSV header: " << line << endl;
+    
+    // Array to keep track of how many rows were written to each partition
+    int partitionRowCount[NUM_PARTITIONS] = {0};
+    
+    int totalRowsProcessed = 0;
+    
+    while (getline(dataFile, line)) {
         stringstream ss(line);
         string token;
         
-        // Skip first two non-vector columns ("id" and "$meta")
-        if (!getline(ss, token, ',')) continue;  // id
-        if (!getline(ss, token, ',')) continue;  // $meta
+        // Skip first two columns (id and meta)
+        if (!getline(ss, token, ',')) continue;
+        if (!getline(ss, token, ',')) continue;
         
-        // Prepare to store 128 integers for this row
-        int row_data[128];
+        int row_data[NUM_DIM];
         int col;
-        for (col = 0; col < 128; col++) {
+        for (col = 0; col < NUM_DIM; col++) {
             if (!getline(ss, token, ',')) {
-                cout << "Row " << total_rows_processed << " ended unexpectedly at column " << col << endl;
+                cout << "Row " << totalRowsProcessed + 1 << " ended unexpectedly at column " << col << endl;
                 break;
             }
             try {
                 row_data[col] = stoi(token);
             } catch (std::exception &e) {
-                cerr << "Error processing row " << total_rows_processed << ", column " << col << ": " << token << endl;
+                cerr << "Error processing row " << totalRowsProcessed + 1 
+                     << ", column " << col << ": " << token << endl;
                 row_data[col] = 0;
             }
         }
-        
-        if (col < 128) {
-            cout << "Row " << total_rows_processed << " did not contain 128 vector values. Skipping row." << endl;
+        if (col < NUM_DIM) {
+            cout << "Row " << totalRowsProcessed + 1 
+                 << " did not contain " << NUM_DIM << " vector values. Skipping row." << endl;
             continue;
         }
         
+        // Determine partition index and offset within that partition based on row index
+        int partitionIndex = totalRowsProcessed / rowsPerPartition;
+        if (partitionIndex >= NUM_PARTITIONS)
+            partitionIndex = NUM_PARTITIONS - 1;  // Place any extra rows in the last partition
         
-        int partition_base = current_partition * num_elements_per_partition;
-        int row_offset = rowInCurrentPartition * 128;
+        int rowOffsetInPartition = partitionRowCount[partitionIndex];
+        int* writeLocation = partitionAddresses[partitionIndex];
+        memcpy(writeLocation + rowOffsetInPartition * NUM_DIM, row_data, NUM_DIM * sizeof(int));
         
+        partitionRowCount[partitionIndex]++;
+        totalRowsProcessed++;
         
-        for (int i = 0; i < 128; i++) {
-            superblock[partition_base + row_offset + i] = row_data[i];
+        // Optionally, print progress every 10,000 rows.
+        if (totalRowsProcessed % 10000 == 0) {
+            cout << "Processed " << totalRowsProcessed << " rows." << endl;
         }
-        
-        
-        rowInCurrentPartition++;
-        
-        
-        if (rowInCurrentPartition == ROWS_PER_PARTITION) {
-            current_partition++;
-            rowInCurrentPartition = 0;
-            
-            
-            if (current_partition >= NUM_PARTITIONS) {
-                moreData = true;
-                return true; // Superblock completely filled
-            }
+    }
+    dataFile.close();
+    
+    cout << "\nTotal rows processed: " << totalRowsProcessed << " out of " << totalRows << endl;
+    
+    // Print a summary of how many rows are stored in each partition.
+    cout << "\nRows stored in each partition:" << endl;
+    for (int p = 0; p < NUM_PARTITIONS; p++) {
+        cout << "Partition " << p << ": " << partitionRowCount[p] << " rows" << endl;
+    }
+    
+    // Print sample data from all partitions (first 128 elements from each partition)
+    cout << "\nSample data from all partitions (first 128 elements):" << endl;
+    for (int p = 0; p < NUM_PARTITIONS; p++) {
+        cout << "\nPartition " << p << ":\n";
+        // Print 128 integers formatted in 8 rows of 16 numbers each for readability
+        for (int j = 0; j < NUM_DIM; j++) {
+            cout << partitionAddresses[p][j] << "\t";
+            if ((j + 1) % 16 == 0)
+                cout << "\n";
         }
     }
     
-    // If we got here, we've reached EOF
-    moreData = false;
-    return filledAny; // Return whether we filled anything at all
-}
-
-// Function to process a superblock (would contain FPGA code in the future)
-void processSuperblock(int *superblock, int NUM_PARTITIONS, int PAGE_SIZE, int num_elements_per_partition, int superblockNumber) {
-    cout << "\nProcessing Superblock #" << superblockNumber << endl;
+    cout << "\nReady to process all partitions with FPGA" << endl;
     
-
-    cout << "First element of each partition in Superblock #" << superblockNumber << ":" << endl;
-    for (int part = 0; part < NUM_PARTITIONS; part++) {
-        int start_index = part * num_elements_per_partition;
-        cout << "Partition " << part << " first element: " << superblock[start_index] << endl;
-    }
-    
-    
-    if (superblockNumber == 0) {
-        // Print all 128 elements from row 0 in partition 0 (similar to original code)
-        cout << "\nRow 0 (from partition 0) data in Superblock #0:" << endl;
-        int *base_partition0 = superblock; // Partition 0 base
-        // Row 0 starts at offset 0 in partition 0
-        for (int i = 0; i < 384; i++) {
-            cout << "v" << i << ": " << base_partition0[i] << "\t";
-            if ((i + 1) % 8 == 0)
-                cout << endl;
-        }
-        cout << endl;
-    }
-    
-    // add FPGA processing code in the future
+    // Beethoven FPGA code (commented out)
     /*
-    // Allocate FPGA memory for the superblock
     fpga_handle_t handle;
-    remote_ptr total_alloc = handle.malloc(NUM_PARTITIONS * PAGE_SIZE);
+    // Allocate FPGA memory for all partitions (each of size 'partitionSizeBytes')
+    remote_ptr total_alloc = handle.malloc(NUM_PARTITIONS * partitionSizeBytes);
     int *host_alloc = (int*) total_alloc.getHostAddr();
     
-    // Copy data to FPGA memory
-    memcpy(host_alloc, superblock, NUM_PARTITIONS * PAGE_SIZE);
+    // Copy all partitioned data to FPGA memory
+    memcpy(host_alloc, datasetPtr, NUM_PARTITIONS * partitionSizeBytes);
     
-    //DMA transfer
+    // Transfer the data to FPGA
     dma_workaround_copy_to_fpga(total_alloc);
     
-    // Execute FPGA operation over here
-   
+    // Execute FPGA operation
+    // [... FPGA processing code ...]
     
-    // Retrieve results
+    // Retrieve results from FPGA, if needed
     dma_workaround_copy_from_fpga(total_alloc);
     
-    // Process or store results
-    
-    
     // Free FPGA memory
-   
+    handle.free(total_alloc);
     */
-}
-
-
-void processLargeDataset(const string& filename) {
-    // Parameters for partitioning - SAME AS ORIGINAL CODE
-    const int NUM_PARTITIONS = 16;
-    const int PAGE_SIZE = 4096; // bytes per partition
-    const int num_elements_per_partition = 1024;  // (4096 bytes / 4 bytes per int)
-    const int ROWS_PER_PARTITION = num_elements_per_partition / 128; // 8 rows
     
-    // Open the CSV file 
-    ifstream infile(filename);
-    if (!infile.is_open()) {
-        cerr << "Failed to open CSV file: " << filename << endl;
-        return;
-    }
-    
-    // Skip header 
-    string line;
-    if (!getline(infile, line)) {
-        cerr << "CSV file is empty." << endl;
-        return;
-    }
-    cout << "Header: " << line << endl;
-    
-    int totalSuperBlocksProcessed = 0;
-    int total_rows_processed = 0;
-    bool moreData = true;
-    
-    while (moreData) {
-        // Allocate memory for exactly 16 partitions (one superblock)
-        int total_elements = NUM_PARTITIONS * num_elements_per_partition;
-        int *superblock = new int[total_elements];
-        memset(superblock, 0, total_elements * sizeof(int));
-        
-        // Fill the superblock with data from the CSV
-        bool superblockFilled = fillSuperblock(infile, superblock, NUM_PARTITIONS, 
-                                              ROWS_PER_PARTITION, num_elements_per_partition,
-                                              total_rows_processed, moreData);
-        
-        if (superblockFilled) {
-            // Process this superblock (future FPGA integration point)
-            processSuperblock(superblock, NUM_PARTITIONS, PAGE_SIZE, 
-                             num_elements_per_partition, totalSuperBlocksProcessed);
-            totalSuperBlocksProcessed++;
-        }
-        
-        
-        delete[] superblock;
-        
-        
-        if (!superblockFilled) {
-            break;
-        }
-    }
-    
-    
-    cout << "\nTotal rows processed: " << total_rows_processed << endl;
-    cout << "Processed " << totalSuperBlocksProcessed << " superblocks." << endl;
-    cout << "Total partitions processed: " << (totalSuperBlocksProcessed * NUM_PARTITIONS) << endl;
-}
-
-int main() {
-    
-    processLargeDataset("out_9.csv");
-    
+    // Free allocated memory using the originally allocated pointer
+    free(raw_ptr);
     return 0;
 }

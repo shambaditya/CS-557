@@ -5,6 +5,7 @@
 #include <cstring>
 #include <stdint.h>   // For uintptr_t
 #include <algorithm>  // For min/max
+#include <cmath>      // For round()
 
 // Beethoven FPGA header includes (commented out)
 // #include <beethoven/fpga_handle.h>
@@ -98,19 +99,19 @@ int main() {
     // Initialize the allocated memory to zero
     memset(datasetPtr, 0, totalAllocBytes);
     
-    // Set up partition start addresses manually from the contiguous block.
+    // Manually assign partition start addresses from the contiguous block.
     int* partitionAddresses[NUM_PARTITIONS];
     int intsPerPartition = partitionSizeBytes / sizeof(int);
-    partitionAddresses[0] = datasetPtr + 0 * intsPerPartition;
-    partitionAddresses[1] = datasetPtr + 1 * intsPerPartition;
-    partitionAddresses[2] = datasetPtr + 2 * intsPerPartition;
-    partitionAddresses[3] = datasetPtr + 3 * intsPerPartition;
-    partitionAddresses[4] = datasetPtr + 4 * intsPerPartition;
-    partitionAddresses[5] = datasetPtr + 5 * intsPerPartition;
-    partitionAddresses[6] = datasetPtr + 6 * intsPerPartition;
-    partitionAddresses[7] = datasetPtr + 7 * intsPerPartition;
-    partitionAddresses[8] = datasetPtr + 8 * intsPerPartition;
-    partitionAddresses[9] = datasetPtr + 9 * intsPerPartition;
+    partitionAddresses[0]  = datasetPtr + 0 * intsPerPartition;
+    partitionAddresses[1]  = datasetPtr + 1 * intsPerPartition;
+    partitionAddresses[2]  = datasetPtr + 2 * intsPerPartition;
+    partitionAddresses[3]  = datasetPtr + 3 * intsPerPartition;
+    partitionAddresses[4]  = datasetPtr + 4 * intsPerPartition;
+    partitionAddresses[5]  = datasetPtr + 5 * intsPerPartition;
+    partitionAddresses[6]  = datasetPtr + 6 * intsPerPartition;
+    partitionAddresses[7]  = datasetPtr + 7 * intsPerPartition;
+    partitionAddresses[8]  = datasetPtr + 8 * intsPerPartition;
+    partitionAddresses[9]  = datasetPtr + 9 * intsPerPartition;
     partitionAddresses[10] = datasetPtr + 10 * intsPerPartition;
     partitionAddresses[11] = datasetPtr + 11 * intsPerPartition;
     partitionAddresses[12] = datasetPtr + 12 * intsPerPartition;
@@ -244,6 +245,32 @@ int main() {
     
     cout << "\nReady to process all partitions with FPGA" << endl;
     
+    // Allocate a query vector for one query (128 fixed-point numbers)
+    int* queryVector = (int*)malloc(NUM_DIM * sizeof(int));
+    if (queryVector == NULL) {
+        cerr << "Failed to allocate query vector" << endl;
+        free(raw_ptr);
+        return -1;
+    }
+    
+    // Initialize query vector with 128 fixed-point integers in Q1.15 format.
+    // Here we generate 128 real values uniformly in [-1, 1] and then convert them.
+      double query_min = -0.02;
+      double query_max = 0.02;
+      for (int i = 0; i < NUM_DIM; i++) {
+    // Compute a real value between query_min and query_max:
+        double real_value = query_min + (query_max - query_min) * i / (NUM_DIM - 1);
+    // Convert to Q1.15 fixed-point:
+        queryVector[i] = static_cast<int>(round(real_value * 32768.0));
+}  
+    // Print  query vector
+    cout << "\nQuery vector (128 Q1.15 fixed-point values):" << endl;
+    for (int i = 0; i < NUM_DIM; i++) {
+        cout << "q" << i << ": " << queryVector[i] << "\t";
+        if ((i + 1) % 8 == 0)
+            cout << "\n";
+    }
+    
     // Beethoven FPGA code (commented out)
     /*
     fpga_handle_t handle;
@@ -254,8 +281,16 @@ int main() {
     // Copy all partitioned data to FPGA memory
     memcpy(host_alloc, datasetPtr, NUM_PARTITIONS * partitionSizeBytes);
     
-    // Transfer the data to FPGA
+    // Allocate FPGA memory for the query vector (128 integers)
+    remote_ptr query_alloc = handle.malloc(NUM_DIM * sizeof(int));
+    int *fpga_query = (int*) query_alloc.getHostAddr();
+    
+    // Copy the query vector from host memory to FPGA memory
+    memcpy(fpga_query, queryVector, NUM_DIM * sizeof(int));
+    
+    // Transfer data to FPGA
     dma_workaround_copy_to_fpga(total_alloc);
+    dma_workaround_copy_to_fpga(query_alloc);
     
     // Execute FPGA operation
     // [... FPGA processing code ...]
@@ -265,9 +300,11 @@ int main() {
     
     // Free FPGA memory
     handle.free(total_alloc);
+    handle.free(query_alloc);
     */
     
     // Free allocated memory using the originally allocated pointer
+    free(queryVector);
     free(raw_ptr);
     return 0;
 }

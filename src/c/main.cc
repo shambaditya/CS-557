@@ -143,14 +143,14 @@ void processSuperblock(int *superblock, int NUM_PARTITIONS, int PAGE_SIZE, int n
     // Execute FPGA operation over here
    
     
-    // Retrieve results if needed
+    // Retrieve results
     dma_workaround_copy_from_fpga(total_alloc);
     
     // Process or store results
     
     
     // Free FPGA memory
-    handle.free(total_alloc);
+   
     */
 }
 

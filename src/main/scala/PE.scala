@@ -5,7 +5,7 @@ import chisel3.util._
 
 //lagom
 
-class PE_Module(val dim: Int = 128, val paral:Int = 1, val W : Int = 16) extends Module {
+class PE_Module(val dim: Int = 32, val paral:Int = 1, val W : Int = 16) extends Module {
   val io = IO(new Bundle {
     val query = Flipped(Decoupled(Vec(paral, SInt(W.W)))) // broadcasted
     val refs = Flipped(Decoupled(Vec(paral, SInt(W.W)))) // each pe in pe group(1xn PEs) processes one ref

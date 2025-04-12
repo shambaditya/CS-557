@@ -5,7 +5,7 @@ import chisel3.util._
 
 
 class DistAddr(W: Int, AW: Int) extends Bundle {
-  val distance = UInt(W.W)
+  val distance = SInt(W.W)
   val addr     = UInt(AW.W)
 }
 
@@ -14,15 +14,15 @@ class KthSmallestTracker(K: Int, W: Int, AW: Int) extends Module {
     val in       = Flipped(Decoupled(new DistAddr(W, AW)))
     //finish signal
     val finish   = Input(Bool()) 
-    val kthOut   = Decoupled(UInt((W.W)))
+    val kthOut   = Decoupled(SInt((W.W)))
     val addrOut  = Output(Vec(K, UInt(AW.W)))      
     val addrValid = Output(Bool())                  
   })
 
  
   val defaultEntry = Wire(new DistAddr(W, AW))
-  defaultEntry.distance := (1.U << (W - 1)).asUInt  // High value (acts as "infinity")
-  defaultEntry.addr     := 0.U
+  defaultEntry.distance := (1.U << (W - 1)).asSInt  // High value (acts as "infinity")
+  defaultEntry.addr := 0.U
 
   
   val heap  = RegInit(VecInit(Seq.fill(K)(defaultEntry)))

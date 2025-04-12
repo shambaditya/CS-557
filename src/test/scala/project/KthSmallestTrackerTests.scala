@@ -28,7 +28,7 @@ class KthSmallestTrackerTests extends TestWithBackendSelect with ChiselScalatest
 
      
       for ((dist, addr) <- testInputs) {
-        c.io.in.bits.distance.poke(dist.U)
+        c.io.in.bits.distance.poke(dist.S)
         c.io.in.bits.addr.poke(addr.U)
         c.io.in.valid.poke(true.B)
         c.clock.step(1)

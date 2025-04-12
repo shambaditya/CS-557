@@ -1,0 +1,4 @@
+pli $init_ins init_ins_calltf - - vpi.tab
+pli $init_outs init_outs_calltf - - vpi.tab
+pli $init_sigs init_sigs_calltf - - vpi.tab
+pli $tick tick_calltf tick_compiletf - vpi.tab

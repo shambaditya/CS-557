@@ -42,7 +42,7 @@ class PE_Module(val dim: Int = 32, val paral:Int = 1, val W : Int = 16) extends 
     val acc_dist = RegInit(0.S(W.W))
     /* compute path */
     val substract = VecInit(io.query.bits.zip(io.refs.bits).map { case (a, b) => a - b })
-    val square = VecInit(substract.map(a => RegNext(a * a)))
+    val square = VecInit(substract.map(a => RegNext(((a * a) >> 8)(15, 0).asSInt)))
     val tmp = if(paral > 1){
       acc_dist + square.reduceTree(_ + _)
     }
@@ -123,7 +123,7 @@ class PE_Module(val dim: Int = 32, val paral:Int = 1, val W : Int = 16) extends 
       dist_north_reg := dist_north_reg
       addr_north_reg := addr_north_reg
     }
-
+    
     /* south bridge dequeue state machine */
     io.address_south <> fifo_addr.io.deq
     io.dist_south <> fifo_dist.io.deq
@@ -133,5 +133,4 @@ class PE_Module(val dim: Int = 32, val paral:Int = 1, val W : Int = 16) extends 
     io.refs.ready := true.B
     io.query.ready := true.B
     io.dist_k.ready := true.B
-
 }

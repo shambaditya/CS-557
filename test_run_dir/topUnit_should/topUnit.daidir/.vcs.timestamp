@@ -1,0 +1,117 @@
+0
+41
++define+CLOCK_PERIOD=1
++itf+/data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/vcsdp_lite.tab
++v2k
++vcs+initreg+random
++vcs+lic+wait
++vcsd1
++vpi
++vpi
+-Mamsrun=
+-Masflags=
+-Mcc=gcc
+-Mcfl= -pipe -fPIC "-I$VCS_HOME/include -I/home/nl232/CS557/test_run_dir/topUnit_should -fPIC -std=c++11" -O -I/data/install/synopsys/vcs/V-2023.12-SP2-3/include
+-Mcplusplus=g++
+-Mcrt0=
+-Mcrtn=
+-Mcsrc=vpi.cpp
+-Mdir=topUnit.csrc
+-Mexternalobj=
+-Mldflags= -lstdc++ -rdynamic
+-Mobjects= /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/libvirsim.so /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/liberrorinf.so /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/libsnpsmalloc.so /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/libvfs.so
+-Mout=topUnit
+-Msaverestoreobj=/data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/vcs_save_restore_new.o
+-Msyslibs=-ldl -lm
+-Mvcsaceobjs=
+-Mxcflags= -pipe -fPIC -I/data/install/synopsys/vcs/V-2023.12-SP2-3/include
+-Mxllcflags=
+-P
+-debug_acc+pp+dmptf
+-debug_region+cell+encrypt
+-full64
+-gen_obj
+-o topUnit
+-picarchive
+-q
+-sverilog
+-timescale=1ns/1ps
+/data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/bin/vcs1
+vpi.tab
+topUnit
+topUnit.sv
+topUnit-harness.sv
+58
+which_declare=declare -f
+XDG_SESSION_ID=2651
+XDG_RUNTIME_DIR=/run/user/1549102
+VSCODE_IPC_HOOK_CLI=/run/user/1549102/vscode-ipc-f11126e0-b126-4c31-92cd-425ad6c6a919.sock
+VSCODE_GIT_IPC_HANDLE=/run/user/1549102/vscode-git-417dfd1402.sock
+VSCODE_GIT_ASKPASS_NODE=/home/nl232/.vscode-server/cli/servers/Stable-ddc367ed5c8936efe395cffeec279b04ffd7db78/server/node
+VSCODE_GIT_ASKPASS_MAIN=/home/nl232/.vscode-server/cli/servers/Stable-ddc367ed5c8936efe395cffeec279b04ffd7db78/server/extensions/git/dist/askpass-main.js
+VSCODE_GIT_ASKPASS_EXTRA_ARGS=
+VMR_MODE_FLAG=64
+VCS_PYTHON3=/data/install/synopsys/vcs/V-2023.12-SP2-3//linux64/bin/Python-3.6.1/bin/python3
+VCS_PATHMAP_PRELOAD_DONE=1
+VCS_MX_HOME_INTERNAL=1
+VCS_MODE_FLAG=64
+VCS_INTERNAL_CONVERTEDLIBS=
+VCS_HOME=/data/install/synopsys/vcs/V-2023.12-SP2-3/
+VCS_EXEC_DONE=1
+VCS_DEPTH=0
+VCS_ARG_ADDED_FOR_TMP=1
+VCS_ARCH=linux64
+UNAME=/bin/uname
+TOOL_HOME=/data/install/synopsys/vcs/V-2023.12-SP2-3/linux64
+TERM_PROGRAM_VERSION=1.98.2
+TERM_PROGRAM=vscode
+SSL_CERT_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+SSL_CERT_DIR=/etc/pki/tls/certs
+SSH_CONNECTION=10.172.12.44 52312 10.138.129.13 22
+SSH_CLIENT=10.172.12.44 52312 22
+SNPS_VCS_PYTHON3=/data/install/synopsys/vcs/V-2023.12-SP2-3//linux64/bin/Python-3.6.1/bin/python3
+SNPS_VCS_CLANG_PATH=/data/install/synopsys/vcs/V-2023.12-SP2-3//linux64/clang
+SNPS_INTERNAL_VCS_LINUX_OS=linux
+SELINUX_USE_CURRENT_RANGE=
+SELINUX_ROLE_REQUESTED=
+SELINUX_LEVEL_REQUESTED=
+SCRNAME=vcs
+SCRIPT_NAME=vcs
+OVA_UUM=0
+MODULES_RUN_QUARANTINE=LD_LIBRARY_PATH LD_PRELOAD
+MODULES_CMD=/usr/share/Modules/libexec/modulecmd.tcl
+MODULESHOME=/usr/share/Modules
+MODULEPATH_modshare=/usr/share/Modules/modulefiles:2:/etc/modulefiles:2:/usr/share/modulefiles:2
+MODULEPATH=/etc/scl/modulefiles:/etc/scl/modulefiles:/etc/scl/modulefiles:/usr/share/Modules/modulefiles:/etc/modulefiles:/usr/share/modulefiles
+LOADEDMODULES=
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+LC_ALL=C
+KRB5CCNAME=FILE:/tmp/krb5cc_1549102_Hx4HIa
+JAVA_OPTS=-Dfile.encoding=UTF-8
+HISTCONTROL=ignoredups
+GIT_ASKPASS=/home/nl232/.vscode-server/cli/servers/Stable-ddc367ed5c8936efe395cffeec279b04ffd7db78/server/extensions/git/dist/askpass.sh
+DEBUGINFOD_URLS=https://debuginfod.centos.org/ 
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1549102/bus
+COLORTERM=truecolor
+CDS_LIC_FILE=27400@license06.egr.duke.edu
+BASH_FUNC_which%%=() {  ( alias;_ eval ${which_declare} ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@_}
+BASH_FUNC_switchml%%=() {  typeset swfound=1;_ if [ "${MODULES_USE_COMPAT_VERSION:-0}" = '1' ]; then_ typeset swname='main';_ if [ -e /usr/share/Modules/libexec/modulecmd.tcl ]; then_ typeset swfound=0;_ unset MODULES_USE_COMPAT_VERSION;_ fi;_ else_ typeset swname='compatibility';_ if [ -e /usr/share/Modules/libexec/modulecmd-compat ]; then_ typeset swfound=0;_ MODULES_USE_COMPAT_VERSION=1;_ export MODULES_USE_COMPAT_VERSION;_ fi;_ fi;_ if [ $swfound -eq 0 ]; then_ echo "Switching to Modules $swname version";_ source /usr/share/Modules/init/bash;_ else_ echo "Cannot switch to Modules $swname version, command not found";_ return 1;_ fi_}
+BASH_FUNC_scl%%=() {  if [ "$1" = "load" -o "$1" = "unload" ]; then_ eval "module $@";_ else_ /usr/bin/scl "$@";_ fi_}
+BASH_FUNC_module%%=() {  _module_raw "$@" 2>&1_}
+BASH_FUNC_ml%%=() {  module ml "$@"_}
+BASH_FUNC__module_raw%%=() {  unset _mlshdbg;_ if [ "${MODULES_SILENT_SHELL_DEBUG:-0}" = '1' ]; then_ case "$-" in _ *v*x*)_ set +vx;_ _mlshdbg='vx'_ ;;_ *v*)_ set +v;_ _mlshdbg='v'_ ;;_ *x*)_ set +x;_ _mlshdbg='x'_ ;;_ *)_ _mlshdbg=''_ ;;_ esac;_ fi;_ unset _mlre _mlIFS;_ if [ -n "${IFS+x}" ]; then_ _mlIFS=$IFS;_ fi;_ IFS=' ';_ for _mlv in ${MODULES_RUN_QUARANTINE:-};_ do_ if [ "${_mlv}" = "${_mlv##*[!A-Za-z0-9_]}" -a "${_mlv}" = "${_mlv#[0-9]}" ]; then_ if [ -n "`eval 'echo ${'$_mlv'+x}'`" ]; then_ _mlre="${_mlre:-}${_mlv}_modquar='`eval 'echo ${'$_mlv'}'`' ";_ fi;_ _mlrv="MODULES_RUNENV_${_mlv}";_ _mlre="${_mlre:-}${_mlv}='`eval 'echo ${'$_mlrv':-}'`' ";_ fi;_ done;_ if [ -n "${_mlre:-}" ]; then_ eval `eval ${_mlre} /usr/bin/tclsh /usr/share/Modules/libexec/modulecmd.tcl bash '"$@"'`;_ else_ eval `/usr/bin/tclsh /usr/share/Modules/libexec/modulecmd.tcl bash "$@"`;_ fi;_ _mlstatus=$?;_ if [ -n "${_mlIFS+x}" ]; then_ IFS=$_mlIFS;_ else_ unset IFS;_ fi;_ unset _mlre _mlv _mlrv _mlIFS;_ if [ -n "${_mlshdbg:-}" ]; then_ set -$_mlshdbg;_ fi;_ unset _mlshdbg;_ return $_mlstatus_}
+0
+0
+4
+1744424472 topUnit-harness.sv
+1744424473 topUnit.sv
+1744424472 vpi.tab
+1729047933 /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/vcsdp_lite.tab
+5
+1744424472 vpi.cpp
+1729049759 /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/libvirsim.so
+1729048454 /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/liberrorinf.so
+1729048397 /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/libsnpsmalloc.so
+1729048454 /data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/libvfs.so
+1744424475 topUnit.daidir
+-1 partitionlib

@@ -12,7 +12,7 @@ class topUnit_Tests extends TestWithBackendSelect with ChiselScalatestTester {
   it should "" in {
     
     test(new topUnit(4,16,1,16)).withAnnotations(simAnnos) { c =>
-        Random.setSeed(42)
+        //Random.setSeed(42)
         c.io.broadcast_query.valid.poke(false.B)
         for(i <- 0 until 4){
             c.io.refs(i).valid.poke(false.B)
@@ -20,7 +20,7 @@ class topUnit_Tests extends TestWithBackendSelect with ChiselScalatestTester {
         
         val dim = 32
         val testInputsArray: Array[Seq[(Int, Int)]] = Array.fill(4)(
-            Seq.fill(128)((Random.between(-10, 11), Random.between(-10, 11)))
+            Seq.fill(128)((Random.between(-200, 200), Random.between(-200, 200)))
             )
         var dist = 0
         c.clock.step(1)
@@ -54,6 +54,8 @@ class topUnit_Tests extends TestWithBackendSelect with ChiselScalatestTester {
         c.clock.step(1)
         c.clock.step(1)
         }
+
+        c.clock.step(32)
         println(c.io.addrOut.peek())
         c.clock.step(32)
     }

@@ -1,0 +1,9 @@
+{"vcs1":{"timestamp_begin":1744424473.827676913, "rt":0.62, "ut":0.29, "st":0.11}}
+{"vcselab":{"timestamp_begin":1744424474.496975992, "rt":0.37, "ut":0.21, "st":0.08}}
+{"link":{"timestamp_begin":1744424474.892015606, "rt":0.99, "ut":0.82, "st":0.18}}
+{"SNPS_VCS_INTERNAL_ROOT_START_TIME": 1744424473.252067028}
+{"VCS_COMP_START_TIME": 1744424473.252067028}
+{"VCS_COMP_END_TIME": 1744424475.975304503}
+{"VCS_USER_OPTIONS": "-full64 -quiet -sverilog -timescale=1ns/1ps -debug_acc+pp+dmptf -debug_region+cell+encrypt -Mdir=topUnit.csrc +v2k +vpi +vcs+lic+wait +vcs+initreg+random +define+CLOCK_PERIOD=1 -P vpi.tab -cpp g++ -O2 -LDFLAGS -lstdc++ -CFLAGS "-I$VCS_HOME/include -I/home/nl232/CS557/test_run_dir/topUnit_should -fPIC -std=c++11" -o topUnit topUnit.sv topUnit-harness.sv vpi.cpp"}
+{"vcs1": {"peak_mem": 397340}}
+{"vcselab": {"peak_mem": 262876}}

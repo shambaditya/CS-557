@@ -1,0 +1,9 @@
+#!/bin/sh -h 
+PYTHONHOME=/data/install/synopsys/vcs/V-2023.12-SP2-3//etc/search/pyh
+export PYTHONHOME
+PYTHONPATH=/data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/pylib27
+export PYTHONPATH
+LD_LIBRARY_PATH=/data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib:/data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/lib/pylib27
+export LD_LIBRARY_PATH
+/data/install/synopsys/vcs/V-2023.12-SP2-3/linux64/bin/vcsfind_create_index.exe  -z  "/home/nl232/CS557/test_run_dir/topUnit_should/topUnit.daidir/debug_dump/fsearch/./idents_K5Ou1B.xml.gz" "/home/nl232/CS557/test_run_dir/topUnit_should/topUnit.daidir/debug_dump/fsearch/./idents_tapi.xml.gz" -o "/home/nl232/CS557/test_run_dir/topUnit_should/topUnit.daidir/debug_dump/fsearch/fsearch.db_tmp"
+\mv "/home/nl232/CS557/test_run_dir/topUnit_should/topUnit.daidir/debug_dump/fsearch/fsearch.db_tmp" "/home/nl232/CS557/test_run_dir/topUnit_should/topUnit.daidir/debug_dump/fsearch/fsearch.db"

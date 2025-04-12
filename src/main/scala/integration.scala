@@ -24,6 +24,8 @@ class integration(implicit p: Parameters) extends AcceleratorCore {
     val addrs = Reg(Vec(16, Address()))
     val finish = RegInit(VecInit(Seq.fill(16)(false.B)))
 
+    
+
     for (i <- 0 until 16) {
         addrs(i) := io.req.bits.data_addr(i)
     }

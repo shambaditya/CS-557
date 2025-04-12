@@ -16,7 +16,7 @@ class ProjectConfig extends AcceleratorConfig(List(
     // declare all of your memory interfaces here!
     memoryChannelConfig = List(
       ReadChannelConfig("data_in", nChannels = 16, dataBytes = 2), //read them in
-      WriteChannelConfig("hash_out", dataBytes = 32)) //write addr back
+      WriteChannelConfig("addr_out", dataBytes = 8)) //write addr back
     ),
   // AWS has recently moved from the F1 instances to F2 instances, incidentally removing
   // some infrastructure we relied on in previous versions of the course. We believe this

@@ -176,7 +176,7 @@ circuit topUnit :
     node _validEntries_0_T = lt(UInt<1>("h0"), count) @[KthSmallestTracker.scala 51:34]
     node defaultEntry_distance = _defaultEntry_distance_T_1 @[KthSmallestTracker.scala 23:26 24:25]
     node _validEntries_0_T_1_distance = mux(_validEntries_0_T, heap_0_distance, defaultEntry_distance) @[KthSmallestTracker.scala 51:29]
-    node defaultEntry_addr = UInt<16>("h0") @[KthSmallestTracker.scala 23:26 25:25]
+    node defaultEntry_addr = UInt<16>("h0") @[KthSmallestTracker.scala 23:26 25:21]
     node _validEntries_0_T_1_addr = mux(_validEntries_0_T, heap_0_addr, defaultEntry_addr) @[KthSmallestTracker.scala 51:29]
     node _validEntries_1_T = lt(UInt<1>("h1"), count) @[KthSmallestTracker.scala 51:34]
     node _validEntries_1_T_1_distance = mux(_validEntries_1_T, heap_1_distance, defaultEntry_distance) @[KthSmallestTracker.scala 51:29]
@@ -764,8 +764,11 @@ circuit topUnit :
     node _substract_T_1 = tail(_substract_T, 1) @[PE.scala 44:84]
     node _substract_T_2 = asSInt(_substract_T_1) @[PE.scala 44:84]
     node substract_0 = _substract_T_2 @[PE.scala 44:{28,28}]
-    node _square_T = mul(substract_0, substract_0) @[PE.scala 45:55]
-    reg square_REG : SInt<32>, clock with :
+    node _square_T = mul(substract_0, substract_0) @[PE.scala 45:57]
+    node _square_T_1 = shr(_square_T, 8) @[PE.scala 45:62]
+    node _square_T_2 = bits(_square_T_1, 15, 0) @[PE.scala 45:67]
+    node _square_T_3 = asSInt(_square_T_2) @[PE.scala 45:75]
+    reg square_REG : SInt<16>, clock with :
       reset => (UInt<1>("h0"), square_REG) @[PE.scala 45:52]
     node square_0 = square_REG @[PE.scala 45:{25,25}]
     node _tmp_T = add(acc_dist, square_0) @[PE.scala 50:16]
@@ -848,11 +851,11 @@ circuit topUnit :
     io_dist_south_valid <= fifo_dist.io_deq_valid @[PE.scala 124:19]
     io_dist_south_bits <= fifo_dist.io_deq_bits @[PE.scala 124:19]
     io_skip_to_next <= _GEN_33
-    io_partial_dist <= asSInt(bits(tmp, 15, 0)) @[PE.scala 55:21]
+    io_partial_dist <= tmp @[PE.scala 55:21]
     fifo_dist.clock <= clock
     fifo_dist.reset <= reset
     fifo_dist.io_enq_valid <= _GEN_35
-    fifo_dist.io_enq_bits <= asSInt(bits(_GEN_36, 15, 0))
+    fifo_dist.io_enq_bits <= _GEN_36
     fifo_dist.io_deq_ready <= io_dist_south_ready @[PE.scala 124:19]
     fifo_addr.clock <= clock
     fifo_addr.reset <= reset
@@ -867,8 +870,8 @@ circuit topUnit :
     addr_PE_reg <= mux(reset, UInt<16>("h0"), _GEN_28) @[PE.scala 38:{30,30}]
     reg_ready_to_enq_PE <= mux(reset, UInt<1>("h0"), reg_ready_to_enq_PE) @[PE.scala 39:{38,38,38}]
     counter <= mux(reset, UInt<8>("h0"), _GEN_26) @[PE.scala 40:{26,26}]
-    acc_dist <= asSInt(bits(mux(reset, asSInt(UInt<16>("h0")), _GEN_32), 15, 0)) @[PE.scala 42:{27,27}]
-    square_REG <= _square_T @[PE.scala 45:52]
+    acc_dist <= mux(reset, asSInt(UInt<16>("h0")), _GEN_32) @[PE.scala 42:{27,27}]
+    square_REG <= _square_T_3 @[PE.scala 45:52]
     compute_valid <= io_refs_valid @[PE.scala 52:32]
 
   module topUnit :

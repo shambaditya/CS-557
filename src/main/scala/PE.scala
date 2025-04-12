@@ -110,6 +110,7 @@ class PE_Module(val dim: Int = 32, val paral:Int = 1, val W : Int = 16) extends 
       fifo_dist.io.enq.valid := true.B
       fifo_dist.io.enq.bits := dist_north_reg
       fifo_addr.io.enq.bits := addr_north_reg
+      reg_ready_to_enq_north := false.B
     }
     /*
     buffer the input from the north PE

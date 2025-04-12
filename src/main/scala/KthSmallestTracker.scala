@@ -21,7 +21,7 @@ class KthSmallestTracker(K: Int, W: Int, AW: Int) extends Module {
 
  
   val defaultEntry = Wire(new DistAddr(W, AW))
-  defaultEntry.distance := (1.U << (W - 1)).asSInt  // High value (acts as "infinity")
+  defaultEntry.distance := 32767.S(16.W)  // High value (acts as "infinity")
   defaultEntry.addr := 0.U
 
   
@@ -68,7 +68,7 @@ class KthSmallestTracker(K: Int, W: Int, AW: Int) extends Module {
 
  
   io.kthOut.bits  := kthEntry.distance
-  io.kthOut.valid := io.finish
+  io.kthOut.valid := true.B
   io.addrValid    := io.finish
 
   

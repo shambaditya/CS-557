@@ -20,12 +20,12 @@ class topUnit_Tests extends TestWithBackendSelect with ChiselScalatestTester {
         
         val dim = 32
         val testInputsArray: Array[Seq[(Int, Int)]] = Array.fill(4)(
-            Seq.fill(128)((Random.between(-200, 200), Random.between(-200, 200)))
+            Seq.fill(1024)((Random.between(-200, 200), Random.between(-200, 200)))
             )
         var dist = 0
         c.clock.step(1)
         var i = 0
-        for (t <- 0 until 128) {
+        for (t <- 0 until 1024) {
         // Enable broadcast query
         c.io.broadcast_query.valid.poke(true.B)
 

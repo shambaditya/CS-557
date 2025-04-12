@@ -23,7 +23,7 @@ class integration(implicit p: Parameters) extends AcceleratorCore {
     val read_ctrs = RegInit(VecInit(Seq.fill(16)(0.U(10.W))))
     val addrs = Reg(Vec(16, Address()))
     val finish = RegInit(VecInit(Seq.fill(16)(false.B)))
-// Example: latch input on a condition (e.g., load signal)
+
     for (i <- 0 until 16) {
         addrs(i) := io.req.bits.data_addr(i)
     }
@@ -71,6 +71,7 @@ class integration(implicit p: Parameters) extends AcceleratorCore {
                     acc.io.refs(group_id).bits := dat_channels(i).data.bits
                     acc.io.refs(group_id).valid := true.B
                     read_ctrs(i) := 0.U
+                    addrs(i) := addrs(i) + 256.U
                     states(i) := idle
                     rc_ptrs(group_id) := Mux(rc_ptrs(group_id) === 3.U, 0.U, rc_ptrs(group_id) + 1.U)
                 }

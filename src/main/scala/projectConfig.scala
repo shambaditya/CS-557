@@ -14,10 +14,15 @@ class ProjectConfig extends AcceleratorConfig(List(
     // an unfortunately complicated boilerplate.
     moduleConstructor = ModuleBuilder(p => new integration()(p)),
     // declare all of your memory interfaces here!
+
     memoryChannelConfig = List(
-      ReadChannelConfig("data_in", nChannels = 16, dataBytes = 2), //read them in
-      WriteChannelConfig("addr_out", dataBytes = 8)) //write addr back
+      ReadChannelConfig("data_in", nChannels = 8, dataBytes = 2), //read them in
+      //WriteChannelConfig("hash_out", dataBytes = 32), //write addr back
+      ReadChannelConfig("query_in", nChannels = 1, dataBytes = 2),
+      // ScratchpadConfig("query_in", dataWidthBits=16, nDatas=256,nPorts=1,latency=1))
+    )
     ),
+    
   // AWS has recently moved from the F1 instances to F2 instances, incidentally removing
   // some infrastructure we relied on in previous versions of the course. We believe this
   // functionality should return soon but we have a workaround for initializing FPGA DRAM
@@ -28,7 +33,7 @@ class ProjectConfig extends AcceleratorConfig(List(
 // than can disrupt the hardware compile/simulation process. Whenever you want to run
 // simulation/synthesis, ensure that the right option is enabled.
 object ProjectConfig extends BeethovenBuild(new ProjectConfig,
-  buildMode = BuildMode.Synthesis, // BuildMode.Simulation
+  buildMode = BuildMode.Simulation, // BuildMode.Synthesis
   // We currently support the F1, F2 instances, a local "Kria" platform (the KV260 FPGA)
   // and are developing support for an ASIC tapeout platform. For your purposes, you
   // should leave this as the AWSF2Platform.

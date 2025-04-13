@@ -10,10 +10,10 @@ class PE_Module(val dim: Int = 32, val paral:Int = 1, val W : Int = 16) extends 
     val query = Flipped(Decoupled(Vec(paral, SInt(W.W)))) // broadcasted
     val refs = Flipped(Decoupled(Vec(paral, SInt(W.W)))) // each pe in pe group(1xn PEs) processes one ref
     val dist_k = Flipped(Decoupled(SInt(W.W)))
-    val address_i = Input(UInt(W.W)) // From controller
+    val address_i = Input(UInt(64.W)) // From controller
     // these are to pass the signals to topK
-    val address_north = Flipped(Decoupled(UInt(W.W))) // From north PE
-    val address_south = Decoupled(UInt(W.W)) // To south PE
+    val address_north = Flipped(Decoupled(UInt(64.W))) // From north PE
+    val address_south = Decoupled(UInt(64.W)) // To south PE
     val dist_north = Flipped(Decoupled(SInt(W.W)))
     val dist_south = Decoupled(SInt(W.W)) 
     //#######################//
@@ -33,9 +33,9 @@ class PE_Module(val dim: Int = 32, val paral:Int = 1, val W : Int = 16) extends 
     val state = RegInit(idle)
     val dist_in_topk = RegInit(32767.S(16.W))
     val dist_north_reg = RegInit(0.S(W.W))//north
-    val addr_north_reg = RegInit(0.U(W.W))//north
+    val addr_north_reg = RegInit(0.U(64.W))//north
     val reg_ready_to_enq_north = RegInit(false.B)
-    val addr_PE_reg = RegInit(0.U(W.W)) // this addr
+    val addr_PE_reg = RegInit(0.U(64.W)) // this addr
     val reg_ready_to_enq_PE = RegInit(false.B)
     val counter = RegInit(0.U(8.W))
     val num_cycle = dim / paral

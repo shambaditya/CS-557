@@ -1,1 +1,1 @@
-# CS557
+# Highly Scalable kNN Accelerator 
